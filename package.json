@@ -1,0 +1,43 @@
+{
+  "name": "ol-map-kit",
+  "version": "0.1.0",
+  "description": "Option-driven OpenLayers starter: map, layer registry, distance/area measure and a small toolbar, with hooks for per-page differences.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./style.css": "./src/ol-map-kit.css"
+  },
+  "files": [
+    "src"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "openlayers",
+    "ol",
+    "map",
+    "gis",
+    "measure",
+    "layer-switcher"
+  ],
+  "author": "YunGi Lee",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yun-dev-cmd/ol-map-kit.git"
+  },
+  "homepage": "https://yun-dev-cmd.github.io/ol-map-kit/demo/",
+  "peerDependencies": {
+    "ol": ">=9"
+  },
+  "devDependencies": {
+    "ol": "^10.11.0",
+    "vitest": "^3.2.4"
+  }
+}
