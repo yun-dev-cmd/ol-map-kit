@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ol-map-kit 데모</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.11.0/ol.css">
+  <link rel="stylesheet" href="../src/ol-map-kit.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1f2933; background: #f5f7fa; }
+    header { padding: 16px 20px 8px; }
+    h1 { margin: 0 0 4px; font-size: 18px; }
+    header p { margin: 0; color: #616e7c; }
+    .wrap { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 12px; padding: 12px 20px 20px; }
+    #map { height: 70vh; min-height: 360px; border: 1px solid #cbd2d9; border-radius: 6px; background: #e4e7eb; }
+    aside { display: grid; gap: 12px; align-content: start; }
+    .card { padding: 12px 14px; background: #fff; border: 1px solid #cbd2d9; border-radius: 6px; }
+    .card h2 { margin: 0 0 6px; font-size: 13px; color: #616e7c; font-weight: 600; }
+    #log { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; max-height: 220px; overflow: auto; }
+    button.lang { font: inherit; padding: 4px 10px; border: 1px solid #cbd2d9; border-radius: 4px; background: #fff; cursor: pointer; }
+    @media (max-width: 760px) { .wrap { grid-template-columns: minmax(0, 1fr); padding: 12px; } header { padding: 12px 12px 4px; } }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "ol/": "https://cdn.jsdelivr.net/npm/ol@10.11.0/",
+        "rbush": "https://esm.sh/rbush@4.0.1",
+        "earcut": "https://esm.sh/earcut@3.0.1"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ol-map-kit</h1>
+    <p>옵션 하나로 지도 · 레이어 목록 · 거리/면적 측정을 켭니다. 도형을 클릭하면 onFeatureClick 훅이 실행됩니다.</p>
+  </header>
+  <div class="wrap">
+    <div id="map"></div>
+    <aside>
+      <div class="card">
+        <h2>훅 실행 기록</h2>
+        <ul id="log"></ul>
+      </div>
+      <div class="card">
+        <h2>도구 문구</h2>
+        <button class="lang" id="lang">English</button>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module">
+    import { createMap, KO_LABELS } from '../src/index.js';
+    import { Style, Fill, Stroke, Circle } from 'ol/style.js';
+
+    // 예시 데이터: 서울시청 주변에 임의로 그린 구역과 지점 (실제 데이터 아님)
+    const zones = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: { name: '구역 A', status: '진행' }, geometry: { type: 'Polygon', coordinates: [[[126.970, 37.570], [126.976, 37.570], [126.976, 37.566], [126.970, 37.566], [126.970, 37.570]]] } },
+        { type: 'Feature', properties: { name: '구역 B', status: '완료' }, geometry: { type: 'Polygon', coordinates: [[[126.979, 37.569], [126.986, 37.569], [126.986, 37.564], [126.979, 37.564], [126.979, 37.569]]] } },
+        { type: 'Feature', properties: { name: '구역 C', status: '진행' }, geometry: { type: 'Polygon', coordinates: [[[126.972, 37.563], [126.978, 37.563], [126.978, 37.559], [126.972, 37.559], [126.972, 37.563]]] } },
+      ],
+    };
+    const points = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: { name: '지점 1' }, geometry: { type: 'Point', coordinates: [126.9735, 37.5680] } },
+        { type: 'Feature', properties: { name: '지점 2' }, geometry: { type: 'Point', coordinates: [126.9825, 37.5665] } },
+        { type: 'Feature', properties: { name: '지점 3' }, geometry: { type: 'Point', coordinates: [126.9750, 37.5610] } },
+      ],
+    };
+
+    const zoneStyle = (f) => new Style({
+      fill: new Fill({ color: f.get('status') === '완료' ? 'rgba(22,163,74,.18)' : 'rgba(37,99,235,.18)' }),
+      stroke: new Stroke({ color: f.get('status') === '완료' ? '#16a34a' : '#2563eb', width: 2 }),
+    });
+    const pointStyle = new Style({
+      image: new Circle({ radius: 6, fill: new Fill({ color: '#dc2626' }), stroke: new Stroke({ color: '#fff', width: 2 }) }),
+    });
+
+    const logEl = document.getElementById('log');
+    const log = (text) => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      logEl.prepend(li);
+    };
+
+    function build(labels) {
+      return createMap('map', {
+        center: [126.978, 37.5655],
+        zoom: 15,
+        labels,
+        layers: [
+          { id: 'zones', title: labels === KO_LABELS ? '구역' : 'Zones', data: zones, style: zoneStyle },
+          { id: 'points', title: labels === KO_LABELS ? '지점' : 'Points', data: points, style: pointStyle },
+        ],
+        hooks: {
+          onReady: (kit) => log(`onReady · 레이어 ${kit.layers.list().length}개`),
+          onFeatureClick: (feature, layer) => log(`onFeatureClick · ${layer.get('title')} / ${feature.get('name')}`),
+          onMeasure: ({ type, text }) => log(`onMeasure · ${type} ${text}`),
+        },
+      });
+    }
+
+    let ko = true;
+    let kit = build(KO_LABELS);
+    window.kit = kit;
+
+    document.getElementById('lang').addEventListener('click', (e) => {
+      ko = !ko;
+      kit.destroy();
+      kit = build(ko ? KO_LABELS : undefined);
+      window.kit = kit;
+      e.currentTarget.textContent = ko ? 'English' : '한국어';
+    });
+  </script>
+</body>
+</html>
