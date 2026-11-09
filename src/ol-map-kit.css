@@ -1,0 +1,63 @@
+/*
+ * ol-map-kit 기본 스타일.
+ * 모든 선택자를 :where() 로 감싸 우선순위를 0 으로 낮췄다.
+ * 쓰는 쪽 CSS 가 클래스 하나만으로 덮어쓸 수 있고, 기존 화면 스타일을 건드리지 않는다.
+ */
+:root {
+  --omk-bg: rgba(255, 255, 255, 0.96);
+  --omk-fg: #1f2933;
+  --omk-muted: #616e7c;
+  --omk-line: #cbd2d9;
+  --omk-accent: #2563eb;
+  --omk-radius: 6px;
+  --omk-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:where(.omk-toolbar) {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  min-width: 140px;
+  border-radius: var(--omk-radius);
+  background: var(--omk-bg);
+  color: var(--omk-fg);
+  font: 13px/1.4 var(--omk-font);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+:where(.omk-group) { display: flex; gap: 4px; }
+
+:where(.omk-toolbar .omk-btn) {
+  all: unset;
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid var(--omk-line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--omk-fg);
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+}
+:where(.omk-toolbar .omk-btn:hover) { border-color: var(--omk-accent); }
+:where(.omk-toolbar .omk-btn[aria-pressed="true"]) { background: var(--omk-accent); border-color: var(--omk-accent); color: #fff; }
+:where(.omk-toolbar .omk-btn:focus-visible) { outline: 2px solid var(--omk-accent); outline-offset: 1px; }
+
+:where(.omk-layers) { margin: 0; padding: 6px 0 0; border: 0; border-top: 1px solid var(--omk-line); display: grid; gap: 2px; }
+:where(.omk-layers legend) { padding: 0; margin-bottom: 4px; color: var(--omk-muted); font-size: 12px; }
+:where(.omk-layers label) { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+:where(.omk-tip) {
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(31, 41, 51, 0.85);
+  color: #fff;
+  font: 12px/1.3 var(--omk-font);
+  white-space: nowrap;
+  pointer-events: none;
+}
+:where(.omk-tip--live) { background: var(--omk-accent); }
